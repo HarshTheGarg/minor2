@@ -5,6 +5,7 @@ import numpy as np
 import copy
 import itertools
 import csv
+from collections import deque
 
 def main():
   handDetector = mp.solutions.hands.Hands(
@@ -15,6 +16,7 @@ def main():
   cap = cv2.VideoCapture(0)
 
   mode = 0
+  zqueue = deque(maxlen=5)
 
   while True:
     key = cv2.waitKey(10)
@@ -44,7 +46,7 @@ def main():
         landmarkList = calc_land_image(frame, hand_lands)
         # print(landmarkList)
 
-        newZ = preprocessZ(hand_lands.landmark[8].z)
+        newZ, zqueue = preprocessZ(hand_lands.landmark[8].z, zqueue)
         # print(newZ)
 
 
@@ -228,10 +230,16 @@ def preprocess(landmarks):
 
   return res
 
-def preprocessZ(zpoint):
+def preprocessZ(zpoint, zqueue):
   zpoint = abs(zpoint)
   t = (zpoint-0.02)/(0.4-0.02)
   t *= 100
-  return t
+  zqueue.append(t)
+  sum = 0
+  for i in zqueue:
+    if i:
+      sum+=i
+  t = sum/len(zqueue)
+  return t, zqueue
 
 main()
