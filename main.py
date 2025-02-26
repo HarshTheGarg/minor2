@@ -44,6 +44,9 @@ def main():
         landmarkList = calc_land_image(frame, hand_lands)
         # print(landmarkList)
 
+        newZ = preprocessZ(hand_lands.landmark[8].z)
+        # print(newZ)
+
 
         if (mode == 1 and 0<=number<=9):
           preprocessedLands = preprocess(landmarkList)
@@ -54,6 +57,7 @@ def main():
         frame = drawBrect(frame, boundRect)
         frame = drawLandMarks(frame, landmarkList)
         frame = drawInfo(frame, boundRect, handedness, mode)
+        frame = drawZCircle(frame, newZ, landmarkList)
         drawingUtil.draw_landmarks(frame, hand_lands)
         # frame = cv2.flip(frame, 1)
 
@@ -176,6 +180,11 @@ def drawInfo(image, brect, handedness, mode):
                 )
   return image
 
+def drawZCircle(image, z, landmarks):
+  cv2.circle(image, tuple(landmarks[8]), int(z*2), (0, 255, 255), 1)
+
+  return image
+
 def setModeNumber(key, mode):
   number = -1
   if 48 <= key <= 57:
@@ -218,5 +227,11 @@ def preprocess(landmarks):
   res = list(map(norm, res))
 
   return res
+
+def preprocessZ(zpoint):
+  zpoint = abs(zpoint)
+  t = (zpoint-0.02)/(0.4-0.02)
+  t *= 100
+  return t
 
 main()
