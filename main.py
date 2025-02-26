@@ -63,10 +63,9 @@ def main():
         pointerLoc = calc_land_screen(hand_lands.landmark[8])
         pointerLoc, xqueue, yqueue = normalizeXY(pointerLoc, xqueue, yqueue)
         # print(pointerLoc)
-        pyautogui.moveTo(*pointerLoc)
 
-
-
+        if mode == 0:
+          pyautogui.moveTo(*pointerLoc)
 
         if (mode == 1 and 0<=number<=9):
           preprocessedLands = normalizeToBase(landmarkList)
@@ -99,7 +98,7 @@ def setModeNumber(key, mode):
 
 def log(number, landmarkList):
   # print([number, *landmarkList])
-  with open("./dataset.csv", "a", newline="") as file:
+  with open("./models/dataset.csv", "a", newline="") as file:
     writer = csv.writer(file)
     writer.writerow([number, *landmarkList])
 

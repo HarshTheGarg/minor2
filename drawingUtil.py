@@ -76,15 +76,15 @@ def drawInfo(image, brect, handedness, mode):
               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),
               1)
   
-  if mode == 1:
-    cv2.putText(image, 
-                "MODE: " + "Logging input",
-                (10, 40),
-                cv2.FONT_HERSHEY_DUPLEX,
-                0.8,
-                (255, 255, 0),
-                2
-                )
+  modeText = ["Mouse", "Logging Input"]
+  cv2.putText(image, 
+              "MODE: " + modeText[mode], 
+              (10, 40),
+              cv2.FONT_HERSHEY_DUPLEX,
+              0.8,
+              (255, 255, 0),
+              2
+              )
   return image
 
 def drawZCircle(image, z, landmarks):
