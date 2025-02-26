@@ -6,6 +6,11 @@ import copy
 import itertools
 import csv
 from collections import deque
+import pyautogui
+
+
+import subprocess
+subprocess.run(["/usr/bin/xhost", "+"])
 
 def main():
   handDetector = mp.solutions.hands.Hands(
@@ -16,7 +21,8 @@ def main():
   cap = cv2.VideoCapture(0)
 
   mode = 0
-  zqueue = deque(maxlen=5)
+  zqueue, xqueue, yqueue = deque(maxlen=5),deque(maxlen=5),deque(maxlen=5)
+  
 
   while True:
     key = cv2.waitKey(10)
@@ -40,33 +46,34 @@ def main():
 
     if hands:
       for hand_lands, handedness in zip(hands, res.multi_handedness):
-        # print(hand_lands)
+        
         boundRect = calc_bounding_box(frame, hand_lands)
-        # print(boundRect)
         landmarkList = calc_land_image(frame, hand_lands)
-        # print(landmarkList)
+
 
         newZ, zqueue = preprocessZ(hand_lands.landmark[8].z, zqueue)
         # print(newZ)
 
+        pointerLoc = calc_land_screen(hand_lands.landmark[8])
+        pointerLoc, xqueue, yqueue = normalizeXY(pointerLoc, xqueue, yqueue)
+        # print(pointerLoc)
+        pyautogui.moveTo(*pointerLoc)
+
+
+
 
         if (mode == 1 and 0<=number<=9):
-          preprocessedLands = preprocess(landmarkList)
+          preprocessedLands = normalizeToBase(landmarkList)
           log(number, preprocessedLands)
 
 
-        # frame = 
+        # Drawings
         frame = drawBrect(frame, boundRect)
         frame = drawLandMarks(frame, landmarkList)
         frame = drawInfo(frame, boundRect, handedness, mode)
         frame = drawZCircle(frame, newZ, landmarkList)
         drawingUtil.draw_landmarks(frame, hand_lands)
-        # frame = cv2.flip(frame, 1)
 
-
-        
-
-    # cv2.imshow("Video", cv2.flip(frame, 1))
     cv2.imshow("Video", frame)
 
 def calc_bounding_box(image, landmarks):
@@ -86,7 +93,7 @@ def calc_land_image(image, landmarks):
   imw, imh = image.shape[1], image.shape[0]
   landar = []
 
-  for _, land in enumerate(landmarks.landmark):
+  for land in landmarks.landmark:
     landx = min(int(land.x * imw), imw-1)
     landy = min(int(land.y * imh), imh-1)
 
@@ -94,6 +101,12 @@ def calc_land_image(image, landmarks):
     
   
   return landar
+
+def calc_land_screen(point):
+  scw, sch = pyautogui.size()
+  x =min(int(point.x * scw), scw)
+  y = min(int(point.y * sch), sch)
+  return [x, y]
 
 def drawBrect(image, brect):
   cv2.rectangle(image, (brect[0], brect[1]), (brect[2], brect[3]), (0,0,0), 1)
@@ -208,7 +221,7 @@ def log(number, landmarkList):
     writer = csv.writer(file)
     writer.writerow([number, *landmarkList])
 
-def preprocess(landmarks):
+def normalizeToBase(landmarks):
   res = copy.deepcopy(landmarks)
   basex, basey = 0,0
 
@@ -234,7 +247,7 @@ def preprocessZ(zpoint, zqueue):
   zpoint = abs(zpoint)
   t = (zpoint-0.02)/(0.4-0.02)
   t *= 100
-  zqueue.append(t)
+  zqueue.append(abs(t))
   sum = 0
   for i in zqueue:
     if i:
@@ -242,4 +255,20 @@ def preprocessZ(zpoint, zqueue):
   t = sum/len(zqueue)
   return t, zqueue
 
+def normalizeXY(loc, xqueue, yqueue):
+  xqueue.append(loc[0]/2)
+  sum = 0
+  for i in xqueue:
+    if i:
+      sum+=i
+  x = sum/len(xqueue)
+
+  yqueue.append(loc[1])
+  sum = 0
+  for i in yqueue:
+    if i:
+      sum+=i
+  y = sum/len(yqueue)
+
+  return [int(x), int(y)], xqueue, yqueue
 main()
