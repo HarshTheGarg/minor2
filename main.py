@@ -3,6 +3,14 @@ import cv2
 import mediapipe as mp
 import csv
 from collections import deque
+
+# To resolve problem with OS using pyautogui
+try:
+  import subprocess
+  subprocess.run(["/usr/bin/xhost", "+"])
+except:
+  pass
+
 import pyautogui
 
 from drawingUtil import drawBrect, drawInfo, drawLandMarks, drawZCircle
@@ -11,12 +19,8 @@ from preprocessingUtil import normalizeToBase, preprocessZ, normalizeXY
 
 from calcUtil import calc_land_image, calc_bounding_box, calc_land_screen
 
-# To resolve problem with OS using pyautogui
-try:
-  import subprocess
-  subprocess.run(["/usr/bin/xhost", "+"])
-except:
-  pass
+from models.knn import knnPredict
+
 
 def main():
   handDetector = mp.solutions.hands.Hands(
@@ -28,6 +32,10 @@ def main():
 
   mode = 0
   zqueue, xqueue, yqueue = deque(maxlen=5),deque(maxlen=5),deque(maxlen=5)
+
+  with open("./models/classes.csv", "r") as file:
+    csvreader = csv.reader(file)
+    labels = [row[0] for row in csvreader]
   
 
   while True:
@@ -64,18 +72,24 @@ def main():
         pointerLoc, xqueue, yqueue = normalizeXY(pointerLoc, xqueue, yqueue)
         # print(pointerLoc)
 
+        preprocessedLands = normalizeToBase(landmarkList)
+
+        gesture = ""
         if mode == 0:
-          pyautogui.moveTo(*pointerLoc)
+          pass
+          # pyautogui.moveTo(*pointerLoc)
+          # gestInd = knnPredict(preprocessedLands, "./models/dataset.csv")
+          # gestInd = 0
+          # gesture = labels[gestInd]
 
         if (mode == 1 and 0<=number<=9):
-          preprocessedLands = normalizeToBase(landmarkList)
           log(number, preprocessedLands)
 
 
         # Drawings
         frame = drawBrect(frame, boundRect)
         frame = drawLandMarks(frame, landmarkList)
-        frame = drawInfo(frame, boundRect, handedness, mode)
+        frame = drawInfo(frame, boundRect, handedness, mode, gesture)
         frame = drawZCircle(frame, newZ, landmarkList)
         drawingUtil.draw_landmarks(frame, hand_lands)
 
@@ -101,6 +115,7 @@ def log(number, landmarkList):
   with open("./models/dataset.csv", "a", newline="") as file:
     writer = csv.writer(file)
     writer.writerow([number, *landmarkList])
+
 
 if __name__ == '__main__':
   main()

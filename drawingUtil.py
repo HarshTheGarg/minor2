@@ -68,10 +68,12 @@ def drawLandMarks(image, landmark_point):
             color, thikness)
   return image
 
-def drawInfo(image, brect, handedness, mode):
+def drawInfo(image, brect, handedness, mode, gesture):
   cv2.rectangle(image, (brect[0], brect[1]-10), (brect[2], brect[1] - 32), (0,0,0), -1)
 
   text = handedness.classification[0].label[0:]
+  if gesture: 
+    text+= ": " + gesture
   cv2.putText(image, text, (brect[0] + 5, brect[1] - 14),
               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),
               1)
