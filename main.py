@@ -19,7 +19,8 @@ from preprocessingUtil import normalizeToBase, preprocessZ, normalizeXY
 
 from calcUtil import calc_land_image, calc_bounding_box, calc_land_screen
 
-from models.knn import knnPredict
+from models.knn2 import knn_predict
+from models.randomForest import rf_predict
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
   )
   drawingUtil = mp.solutions.drawing_utils
 
+  # cap = cv2.VideoCapture(203, cv2.CAP_ANY)
   cap = cv2.VideoCapture(0)
 
   mode = 0
@@ -78,9 +80,11 @@ def main():
         if mode == 0:
           pass
           # pyautogui.moveTo(*pointerLoc)
-          # gestInd = knnPredict(preprocessedLands, "./models/dataset.csv")
+          gestInd = rf_predict(preprocessedLands, "./models/random_forest_model.pkl")
+          # gestInd = knn_predict(preprocessedLands, "./models/knn_dataset.pkl")
           # gestInd = 0
-          # gesture = labels[gestInd]
+          gesture = labels[gestInd]
+          # print(gesture)
 
         if (mode == 1 and 0<=number<=9):
           log(number, preprocessedLands)
