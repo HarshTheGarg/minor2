@@ -19,7 +19,7 @@ from preprocessingUtil import normalizeToBase, preprocessZ, normalizeXY
 
 from calcUtil import calc_land_image, calc_bounding_box, calc_land_screen
 
-from models.knn2 import knn_predict
+from models.knn import knn_predict
 from models.randomForest import rf_predict
 from models.svm import svm_predict
 
