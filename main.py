@@ -21,6 +21,7 @@ from calcUtil import calc_land_image, calc_bounding_box, calc_land_screen
 
 from models.knn2 import knn_predict
 from models.randomForest import rf_predict
+from models.svm import svm_predict
 
 
 def main():
@@ -79,9 +80,9 @@ def main():
         gesture = ""
         if mode == 0:
           pass
-          # pyautogui.moveTo(*pointerLoc)
-          gestInd = rf_predict(preprocessedLands, "./models/random_forest_model.pkl")
+          # gestInd = rf_predict(preprocessedLands, "./models/random_forest_model.pkl")
           # gestInd = knn_predict(preprocessedLands, "./models/knn_dataset.pkl")
+          gestInd = svm_predict(preprocessedLands, "./models/svm_model.pkl")
           # gestInd = 0
           gesture = labels[gestInd]
           # print(gesture)
