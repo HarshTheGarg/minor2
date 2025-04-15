@@ -22,6 +22,7 @@ from calcUtil import calc_land_image, calc_bounding_box, calc_land_screen
 from models.knn import knn_predict
 from models.randomForest import rf_predict
 from models.svm import svm_predict
+from models.neuralNet import nn_predict
 
 
 def main():
@@ -82,7 +83,9 @@ def main():
           pass
           # gestInd = rf_predict(preprocessedLands, "./models/random_forest_model.pkl")
           # gestInd = knn_predict(preprocessedLands, "./models/knn_dataset.pkl")
-          gestInd = svm_predict(preprocessedLands, "./models/svm_model.pkl")
+          # gestInd = svm_predict(preprocessedLands, "./models/svm_model.pkl")
+          gestInd = nn_predict(preprocessedLands, "./models/neural_net.pt")
+
           # gestInd = 0
           gesture = labels[gestInd]
           # print(gesture)
